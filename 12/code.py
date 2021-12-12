@@ -1,38 +1,33 @@
-def dfs_part1(data, cur_path, paths):
+
+def dfs(data, cur_path, paths, condition):
 	if cur_path[-1] == "end":
 		paths.append(cur_path)
 		return
 	for n in data.get(cur_path[-1],[]):
-		# small caves only once
-		if n.islower() and n in cur_path:
+		if condition(n, cur_path):
 			continue
-		dfs_part1(data, cur_path + [n], paths)
+		dfs(data, cur_path + [n], paths, condition)
 	return
+
+# small caves only once
+def part1_condition(n, cur_path):
+	return n.islower() and n in cur_path
 
 def part1(data):
 	paths = []
-	dfs_part1(data, ["start"], paths)
+	dfs(data, ["start"], paths, part1_condition)
 	return len(paths)
 
 def max_small_cave_count(path):
 	return any(d.islower() and path.count(d) == 2 for d in path)
 
-def dfs_part2(data, cur_path, paths):
-	if cur_path[-1] == "end":
-		paths.append(cur_path)
-		return
-	for n in data.get(cur_path[-1],[]):
-		# one small cave twice
-		if n.islower() and max_small_cave_count(cur_path) and cur_path.count(n)>=1:
-			continue
-		if n == "start":
-			continue
-		dfs_part2(data, cur_path + [n], paths)
-	return
+# one small cave twice, start only once
+def part2_condition(n, cur_path):
+	return (n.islower() and max_small_cave_count(cur_path) and cur_path.count(n)>=1) or n == "start"
 
 def part2(data):
 	paths = []
-	dfs_part2(data, ["start"], paths)
+	dfs(data, ["start"], paths, part2_condition)
 #	return "\n".join(sorted(",".join(p) for p in paths))
 	return len(paths)
 
@@ -42,6 +37,7 @@ if __name__ == "__main__":
 		print("Gib data")
 		exit()
 	data = dict()
+	# input parsing, prepare graph dict
 	for l in open(sys.argv[1]).read().splitlines():
 		a,b = l.split("-")
 		if not data.get(a):
